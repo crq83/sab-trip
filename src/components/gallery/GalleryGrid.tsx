@@ -41,7 +41,7 @@ export default function GalleryGrid({ items }: Props) {
         {items.map((item, i) => (
           <div
             key={item.media.id}
-            className="break-inside-avoid cursor-pointer group relative overflow-hidden rounded-lg bg-stone-100"
+            className="break-inside-avoid cursor-pointer group relative overflow-hidden rounded-xl bg-slate-100"
             onClick={() => setLightboxIndex(i)}
           >
             {item.media.media_type === 'image' ? (

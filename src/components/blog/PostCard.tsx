@@ -19,10 +19,10 @@ export default function PostCard({ post }: Props) {
 
   return (
     <Link href={`/blog/${post.slug}`} className="group block">
-      <article className="bg-white rounded-xl overflow-hidden shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+      <article className="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-lg transition-shadow">
         {/* Cover image */}
         {coverMedia ? (
-          <div className="aspect-video overflow-hidden bg-stone-100">
+          <div className="aspect-video overflow-hidden bg-slate-100">
             <img
               src={coverMedia.r2_url}
               alt={post.title}
@@ -30,18 +30,18 @@ export default function PostCard({ post }: Props) {
             />
           </div>
         ) : (
-          <div className="aspect-video bg-gradient-to-br from-[#2d5016]/20 to-[#0ea5e9]/20 flex items-center justify-center">
-            <FileText className="w-8 h-8 text-[#2d5016]/40" />
+          <div className="aspect-video bg-gradient-to-br from-[#166534]/20 to-[#0d9488]/20 flex items-center justify-center">
+            <FileText className="w-8 h-8 text-[#166534]/40" />
           </div>
         )}
 
         <div className="p-4">
           {/* Meta row */}
           <div className="flex items-center justify-between mb-2">
-            <time className="text-xs text-stone-500 font-medium">{date}</time>
+            <time className="text-xs text-slate-400 font-medium">{date}</time>
             <div className="flex items-center gap-2">
               {mediaCount > 0 && (
-                <span className="flex items-center gap-1 text-xs text-stone-500">
+                <span className="flex items-center gap-1 text-xs text-slate-400">
                   {hasVideo ? (
                     <Video className="w-3 h-3" />
                   ) : (
@@ -53,19 +53,19 @@ export default function PostCard({ post }: Props) {
             </div>
           </div>
 
-          <h2 className="font-display text-lg leading-tight text-[#1e293b] group-hover:text-[#2d5016] transition-colors mb-1">
+          <h2 className="font-display text-lg font-semibold leading-tight text-[#0f172a] group-hover:text-[#166534] transition-colors mb-1">
             {post.title}
           </h2>
 
           {post.location_name && (
             <div className="flex items-center gap-1 mt-1">
-              <MapPin className="w-3 h-3 text-amber-600 shrink-0" />
-              <span className="text-xs text-stone-500 truncate">{post.location_name}</span>
+              <MapPin className="w-3 h-3 text-[#f97316] shrink-0" />
+              <span className="text-xs text-slate-500 truncate">{post.location_name}</span>
             </div>
           )}
 
           {post.body && (
-            <p className="mt-2 text-sm text-stone-600 line-clamp-2">{post.body}</p>
+            <p className="mt-2 text-sm text-slate-600 line-clamp-2">{post.body}</p>
           )}
         </div>
       </article>

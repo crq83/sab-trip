@@ -37,15 +37,15 @@ export default async function GalleryPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <h1 className="font-display text-5xl text-[#1e293b] tracking-widest uppercase mb-1">
+        <h1 className="font-display text-5xl font-bold text-[#0f172a] mb-1">
           Gallery
         </h1>
         {items.length > 0 ? (
-          <p className="text-stone-500 text-sm">
+          <p className="text-slate-500 text-sm">
             {imageCount} photo{imageCount !== 1 ? 's' : ''} · {videoCount} video{videoCount !== 1 ? 's' : ''}
           </p>
         ) : (
-          <p className="text-stone-500 text-sm">Media will appear here once the trip begins</p>
+          <p className="text-slate-500 text-sm">Media will appear here once the trip begins</p>
         )}
       </div>
 
@@ -53,8 +53,8 @@ export default async function GalleryPage() {
         <GalleryGrid items={items} />
       ) : (
         <div className="text-center py-20">
-          <ImageIcon className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-          <p className="text-stone-400 text-sm">No photos yet — check back once the adventure starts!</p>
+          <ImageIcon className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+          <p className="text-slate-400 text-sm">No photos yet — check back once the adventure starts!</p>
         </div>
       )}
     </div>

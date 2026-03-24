@@ -58,7 +58,7 @@ export default async function PostPage({ params }: Props) {
     <div className="max-w-3xl mx-auto px-4 py-12">
       <Link
         href="/blog"
-        className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-[#2d5016] mb-8 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#166534] mb-8 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         All posts
@@ -66,7 +66,7 @@ export default async function PostPage({ params }: Props) {
 
       {/* Hero image */}
       {coverImage && (
-        <div className="rounded-2xl overflow-hidden mb-8 aspect-video bg-stone-100">
+        <div className="rounded-3xl overflow-hidden mb-8 aspect-video bg-slate-100">
           <img
             src={coverImage.r2_url}
             alt={post.title}
@@ -77,18 +77,18 @@ export default async function PostPage({ params }: Props) {
 
       {/* Header */}
       <header className="mb-8">
-        <h1 className="font-display text-4xl md:text-5xl text-[#1e293b] tracking-widest uppercase leading-tight mb-4">
+        <h1 className="font-display text-4xl md:text-5xl font-bold text-[#0f172a] leading-tight mb-4">
           {post.title}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-4 text-sm text-stone-500">
+        <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-4 h-4" />
             <time>{date}</time>
           </div>
           {post.location_name && (
             <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-amber-600" />
+              <MapPin className="w-4 h-4 text-[#f97316]" />
               <span>{post.location_name}</span>
             </div>
           )}

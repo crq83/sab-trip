@@ -1,18 +1,31 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-forest: #2d5016;
-  --color-forest-light: #3d6b1e;
-  --color-slate-dark: #1e293b;
-  --color-amber-warm: #d97706;
-  --color-sky-bright: #0ea5e9;
-  --color-cream: #faf7f2;
-  --color-stone: #78716c;
+  /* Adventure palette */
+  --color-navy:          #0f172a;
+  --color-alpine:        #166534;
+  --color-alpine-light:  #15803d;
+  --color-ocean:         #0d9488;
+  --color-ocean-light:   #0f766e;
+  --color-sunset:        #f97316;
+  --color-sunset-warm:   #ea580c;
+  --color-snow:          #f8fafc;
+  --color-sand:          #fef3c7;
+  --color-muted:         #64748b;
+
+  /* Legacy aliases so existing inline hex classes continue to work */
+  --color-forest:        #166534;
+  --color-forest-light:  #15803d;
+  --color-slate-dark:    #0f172a;
+  --color-amber-warm:    #f97316;
+  --color-sky-bright:    #0d9488;
+  --color-cream:         #f8fafc;
+  --color-stone:         #64748b;
 }
 
 :root {
-  --background: #faf7f2;
-  --foreground: #1e293b;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 html {
@@ -22,17 +35,25 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
 }
 
-.topo-bg {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cpath d='M0 300 Q150 230 300 300 Q450 370 600 300' stroke='%232d5016' stroke-opacity='0.07' stroke-width='2' fill='none'/%3E%3Cpath d='M0 330 Q150 260 300 330 Q450 400 600 330' stroke='%232d5016' stroke-opacity='0.05' stroke-width='2' fill='none'/%3E%3Cpath d='M0 270 Q150 200 300 270 Q450 340 600 270' stroke='%232d5016' stroke-opacity='0.05' stroke-width='2' fill='none'/%3E%3Cpath d='M0 240 Q150 170 300 240 Q450 310 600 240' stroke='%232d5016' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 360 Q150 290 300 360 Q450 430 600 360' stroke='%232d5016' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 210 Q150 140 300 210 Q450 280 600 210' stroke='%232d5016' stroke-opacity='0.03' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 390 Q150 320 300 390 Q450 460 600 390' stroke='%232d5016' stroke-opacity='0.03' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-  background-size: 600px 600px;
-}
-
+/* Display font: Playfair Display — editorial, adventure feel */
 .font-display {
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: 0.02em;
+}
+
+/* Mountain topo background — denser alpine-green contours */
+.topo-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Cpath d='M0 300 Q200 220 400 300 Q600 380 800 300' stroke='%23166534' stroke-opacity='0.09' stroke-width='2' fill='none'/%3E%3Cpath d='M0 330 Q200 250 400 330 Q600 410 800 330' stroke='%23166534' stroke-opacity='0.07' stroke-width='2' fill='none'/%3E%3Cpath d='M0 270 Q200 190 400 270 Q600 350 800 270' stroke='%23166534' stroke-opacity='0.07' stroke-width='2' fill='none'/%3E%3Cpath d='M0 360 Q200 280 400 360 Q600 440 800 360' stroke='%23166534' stroke-opacity='0.05' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 240 Q200 160 400 240 Q600 320 800 240' stroke='%23166534' stroke-opacity='0.05' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 390 Q200 310 400 390 Q600 470 800 390' stroke='%23166534' stroke-opacity='0.04' stroke-width='1' fill='none'/%3E%3Cpath d='M0 210 Q200 130 400 210 Q600 290 800 210' stroke='%23166534' stroke-opacity='0.04' stroke-width='1' fill='none'/%3E%3Cpath d='M0 420 Q200 340 400 420 Q600 500 800 420' stroke='%23166534' stroke-opacity='0.03' stroke-width='1' fill='none'/%3E%3Cpath d='M0 180 Q200 100 400 180 Q600 260 800 180' stroke='%23166534' stroke-opacity='0.03' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+  background-size: 800px 600px;
+}
+
+/* Ocean wave background — smooth sinusoidal curves in teal */
+.wave-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='200'%3E%3Cpath d='M0 100 C200 60 400 140 800 100' stroke='%230d9488' stroke-opacity='0.06' stroke-width='2' fill='none'/%3E%3Cpath d='M0 130 C200 90 400 170 800 130' stroke='%230d9488' stroke-opacity='0.05' stroke-width='2' fill='none'/%3E%3Cpath d='M0 70 C200 30 400 110 800 70' stroke='%230d9488' stroke-opacity='0.05' stroke-width='2' fill='none'/%3E%3Cpath d='M0 160 C200 120 400 200 800 160' stroke='%230d9488' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 40 C200 0 400 80 800 40' stroke='%230d9488' stroke-opacity='0.03' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-size: 800px 200px;
 }
 
 /* Leaflet fix: ensure tiles load above backdrop */

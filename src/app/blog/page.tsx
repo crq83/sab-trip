@@ -25,10 +25,10 @@ export default async function BlogPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       <div className="mb-8">
-        <h1 className="font-display text-5xl text-[#1e293b] tracking-widest uppercase mb-1">
+        <h1 className="font-display text-5xl font-bold text-[#0f172a] mb-1">
           Journal
         </h1>
-        <p className="text-stone-500 text-sm">
+        <p className="text-slate-500 text-sm">
           {posts.length > 0
             ? `${posts.length} post${posts.length !== 1 ? 's' : ''} from the field`
             : 'Posts will appear here once the trip begins'}
@@ -43,8 +43,8 @@ export default async function BlogPage() {
         </div>
       ) : (
         <div className="text-center py-20">
-          <BookOpen className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-          <p className="text-stone-400 text-sm">No posts yet — check back once the trip starts!</p>
+          <BookOpen className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+          <p className="text-slate-400 text-sm">No posts yet — check back once the trip starts!</p>
         </div>
       )}
     </div>
