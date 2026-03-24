@@ -19,6 +19,37 @@ interface CloudmailinPayload {
   attachments?: CloudmailinAttachment[];
 }
 
+// Parse "📍 Valdez, AK" or "Location: Girdwood AK" from email body.
+// Returns the matched line and the query string for geocoding.
+function parseLocationFromBody(body: string): { tag: string; query: string } | null {
+  const match = body.match(/^📍\s*(.+)$/mu) || body.match(/^[Ll]ocation:\s*(.+)$/mu);
+  if (!match) return null;
+  return { tag: match[0], query: match[1].trim() };
+}
+
+// Geocode a place name via Nominatim (OpenStreetMap, free, no API key needed).
+async function geocodeLocation(query: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'sab-trip-travel-blog/1.0' },
+    });
+    if (!res.ok) return null;
+    const results = await res.json();
+    if (!results[0]) {
+      console.log(`[geo] No geocode result for: "${query}"`);
+      return null;
+    }
+    const lat = parseFloat(results[0].lat);
+    const lng = parseFloat(results[0].lon);
+    console.log(`[geo] "${query}" → ${lat}, ${lng}`);
+    return { lat, lng };
+  } catch (err) {
+    console.warn('[geo] Nominatim error:', err instanceof Error ? err.message : String(err));
+    return null;
+  }
+}
+
 function generateSlug(title: string): string {
   return slugify(title, { lower: true, strict: true, trim: true }).slice(0, 80);
 }
@@ -91,6 +122,25 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     return { ok: true, reason: 'already processed' };
   }
 
+  // Parse location tag from body ("📍 Valdez, AK" or "Location: Girdwood AK")
+  // and strip it from the displayed body text.
+  let cleanBody = bodyText;
+  let postLat: number | null = null;
+  let postLng: number | null = null;
+  let locationName: string | null = null;
+
+  const locationTag = parseLocationFromBody(bodyText);
+  if (locationTag) {
+    cleanBody = bodyText.replace(locationTag.tag, '').replace(/\n{3,}/g, '\n\n').trim();
+    locationName = locationTag.query;
+    console.log(`[email] Location tag found: "${locationTag.query}"`);
+    const geocoded = await geocodeLocation(locationTag.query);
+    if (geocoded) {
+      postLat = geocoded.lat;
+      postLng = geocoded.lng;
+    }
+  }
+
   // Process attachments
   const attachments = payload.attachments || [];
   type UploadedMedia = {
@@ -105,8 +155,6 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     exifTakenAt: Date | null;
   };
   const uploadedMedia: UploadedMedia[] = [];
-  let postLat: number | null = null;
-  let postLng: number | null = null;
   let postDate: Date | null = null;
 
   for (const attachment of attachments) {
@@ -137,6 +185,7 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
       exifLat = exif.lat;
       exifLng = exif.lng;
       exifTakenAt = exif.takenAt;
+      // Use EXIF GPS only if no body location tag was found
       if (exifLat && exifLng && postLat === null) {
         postLat = exifLat;
         postLng = exifLng;
@@ -170,10 +219,11 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     .insert({
       title: subject,
       slug,
-      body: bodyText,
+      body: cleanBody,
       status: 'published',
       lat: postLat,
       lng: postLng,
+      location_name: locationName,
       email_message_id: messageId,
       email_from: sender,
       post_date: (postDate ?? new Date()).toISOString(),
