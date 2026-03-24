@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Compass, Menu, X } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Compass, Menu, X, LogOut, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { clsx } from 'clsx';
 
@@ -14,9 +14,20 @@ const navLinks = [
   { href: '/gallery', label: 'Gallery' },
 ];
 
-export default function Navbar() {
+interface Props {
+  isAdmin?: boolean;
+}
+
+export default function Navbar({ isAdmin = false }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+    router.refresh();
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f172a]/95 backdrop-blur-sm border-b border-white/10">
@@ -47,6 +58,23 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+
+          {/* Admin badge */}
+          {isAdmin && (
+            <span className="ml-1 flex items-center gap-1 px-2 py-1 text-xs font-medium text-amber-400 bg-amber-400/10 rounded-lg border border-amber-400/20">
+              <Shield className="w-3 h-3" />
+              Admin
+            </span>
+          )}
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="ml-1 flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/50 hover:text-white/80 hover:bg-white/10 rounded-lg transition-colors"
+            title="Log out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Mobile toggle */}
@@ -75,6 +103,19 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          {isAdmin && (
+            <div className="flex items-center gap-1.5 py-2.5 text-xs text-amber-400 border-b border-white/10">
+              <Shield className="w-3 h-3" />
+              Admin mode active
+            </div>
+          )}
+          <button
+            onClick={() => { setOpen(false); handleLogout(); }}
+            className="flex items-center gap-2 py-2.5 text-sm text-white/50 w-full"
+          >
+            <LogOut className="w-4 h-4" />
+            Log out
+          </button>
         </div>
       )}
     </nav>

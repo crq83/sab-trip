@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
 export const r2Client = new S3Client({
@@ -31,4 +31,17 @@ export async function uploadToR2(
 
   const r2Url = `${process.env.R2_PUBLIC_URL}/${r2Key}`;
   return { r2Key, r2Url };
+}
+
+export async function deleteFromR2(keys: string[]): Promise<void> {
+  if (keys.length === 0) return;
+  await r2Client.send(
+    new DeleteObjectsCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Delete: {
+        Objects: keys.map((Key) => ({ Key })),
+        Quiet: true,
+      },
+    })
+  );
 }

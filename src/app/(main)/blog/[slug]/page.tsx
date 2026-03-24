@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { MapPin, Calendar, ArrowLeft } from 'lucide-react';
 import { createAnonClient } from '@/lib/supabase/server';
 import PostBody from '@/components/blog/PostBody';
+import AdminControls from '@/components/admin/AdminControls';
+import { getAuthState } from '@/lib/auth';
 import { Post, Media } from '@/types';
 
 interface Props {
@@ -42,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getPost(slug);
+  const [post, { isAdmin }] = await Promise.all([getPost(slug), getAuthState()]);
   if (!post) notFound();
 
   const date = new Date(post.post_date).toLocaleDateString('en-US', {
@@ -74,6 +76,9 @@ export default async function PostPage({ params }: Props) {
           />
         </div>
       )}
+
+      {/* Admin controls */}
+      {isAdmin && <AdminControls post={post} />}
 
       {/* Header */}
       <header className="mb-8">
