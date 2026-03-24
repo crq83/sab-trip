@@ -45,7 +45,7 @@ export default function TravelMap({ posts }: Props) {
 
       // Itinerary stop markers (dimmed)
       itinerary.forEach((stop) => {
-        const color = stop.trip === 'alaska' ? '#2d5016' : '#0ea5e9';
+        const color = stop.trip === 'alaska' ? '#166534' : '#0d9488';
         const icon = L.divIcon({
           html: `<div style="width:10px;height:10px;border-radius:50%;background:${color};border:2px solid white;opacity:0.7;"></div>`,
           className: '',
@@ -67,11 +67,11 @@ export default function TravelMap({ posts }: Props) {
 
         let iconHtml: string;
         if (coverMedia) {
-          iconHtml = `<div style="width:44px;height:44px;border-radius:50%;overflow:hidden;border:3px solid #d97706;box-shadow:0 2px 8px rgba(0,0,0,0.3)"><img src="${coverMedia.r2_url}" style="width:100%;height:100%;object-fit:cover"/></div>`;
+          iconHtml = `<div style="width:44px;height:44px;border-radius:50%;overflow:hidden;border:3px solid #f97316;box-shadow:0 2px 8px rgba(0,0,0,0.3)"><img src="${coverMedia.r2_url}" style="width:100%;height:100%;object-fit:cover"/></div>`;
         } else if (hasVideo) {
           iconHtml = `<div style="width:40px;height:40px;border-radius:50%;background:#7c3aed;border:3px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3)"><span style="color:white;font-size:18px">▶</span></div>`;
         } else {
-          iconHtml = `<div style="width:40px;height:40px;border-radius:50%;background:#d97706;border:3px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3)"><span style="color:white;font-size:16px">📝</span></div>`;
+          iconHtml = `<div style="width:40px;height:40px;border-radius:50%;background:#f97316;border:3px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3)"><span style="color:white;font-size:16px">📝</span></div>`;
         }
 
         const icon = L.divIcon({
@@ -91,7 +91,7 @@ export default function TravelMap({ posts }: Props) {
             ${coverMedia ? `<img src="${coverMedia.r2_url}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px"/>` : ''}
             <strong style="display:block;margin-bottom:2px">${post.title}</strong>
             <small style="color:#888">${date}${post.location_name ? ` · ${post.location_name}` : ''}</small>
-            <br><a href="/blog/${post.slug}" style="color:#2d5016;font-size:12px;margin-top:4px;display:inline-block">Read more →</a>
+            <br><a href="/blog/${post.slug}" style="color:#166534;font-size:12px;margin-top:4px;display:inline-block">Read more →</a>
           </div>
         `;
 

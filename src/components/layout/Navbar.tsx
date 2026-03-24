@@ -19,14 +19,14 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#1e293b]/95 backdrop-blur-sm border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f172a]/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link
           href="/"
-          className="flex items-center gap-2 text-white hover:text-amber-400 transition-colors"
+          className="flex items-center gap-2 text-white hover:text-[#f97316] transition-colors"
         >
-          <Compass className="w-5 h-5 text-amber-400" strokeWidth={2} />
-          <span className="font-display tracking-widest text-sm font-bold uppercase">
+          <Compass className="w-5 h-5 text-[#f97316]" strokeWidth={2} />
+          <span className="font-display tracking-wide text-sm font-bold uppercase">
             AK · HI 2026
           </span>
         </Link>
@@ -38,9 +38,9 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               className={clsx(
-                'px-3 py-1.5 rounded text-sm tracking-wide transition-colors',
+                'px-3 py-1.5 rounded-lg text-sm tracking-wide transition-colors',
                 pathname === link.href
-                  ? 'text-amber-400 bg-white/10'
+                  ? 'text-[#f97316] bg-white/10'
                   : 'text-white/70 hover:text-white hover:bg-white/10'
               )}
             >
@@ -61,7 +61,7 @@ export default function Navbar() {
 
       {/* Mobile dropdown */}
       {open && (
-        <div className="md:hidden bg-[#1e293b] border-t border-white/10 px-4 py-2">
+        <div className="md:hidden bg-[#0f172a] border-t border-white/10 px-4 py-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -69,7 +69,7 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
               className={clsx(
                 'block py-2.5 text-sm tracking-wide border-b border-white/10 last:border-0',
-                pathname === link.href ? 'text-amber-400' : 'text-white/70'
+                pathname === link.href ? 'text-[#f97316]' : 'text-white/70'
               )}
             >
               {link.label}

@@ -12,10 +12,10 @@ export default function PostBody({ body, media }: Props) {
   return (
     <div>
       {body && (
-        <div className="prose prose-stone max-w-none mb-8">
+        <div className="prose prose-slate max-w-none mb-8">
           {body.split('\n').map((paragraph, i) =>
             paragraph.trim() ? (
-              <p key={i} className="mb-4 text-stone-700 leading-relaxed">
+              <p key={i} className="mb-4 text-slate-700 leading-relaxed">
                 {paragraph}
               </p>
             ) : null
@@ -35,7 +35,7 @@ export default function PostBody({ body, media }: Props) {
           }
         >
           {images.map((img) => (
-            <div key={img.id} className="overflow-hidden rounded-lg bg-stone-100">
+            <div key={img.id} className="overflow-hidden rounded-xl bg-slate-100">
               <img
                 src={img.r2_url}
                 alt={img.file_name || 'Travel photo'}
@@ -49,7 +49,7 @@ export default function PostBody({ body, media }: Props) {
 
       {/* Videos */}
       {videos.map((video) => (
-        <div key={video.id} className="mb-6 rounded-lg overflow-hidden bg-black">
+        <div key={video.id} className="mb-6 rounded-xl overflow-hidden bg-black">
           <video
             src={video.r2_url}
             controls

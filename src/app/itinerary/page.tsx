@@ -14,10 +14,10 @@ export default function ItineraryPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="mb-8 text-center">
-        <h1 className="font-display text-5xl text-[#1e293b] tracking-widest uppercase mb-2">
+        <h1 className="font-display text-5xl font-bold text-[#0f172a] mb-2">
           Itinerary
         </h1>
-        <p className="text-stone-500 text-sm">April 8 – May 2, 2026</p>
+        <p className="text-slate-500 text-sm">April 8 – May 2, 2026</p>
       </div>
 
       {/* Trip filter */}
@@ -35,11 +35,11 @@ export default function ItineraryPage() {
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               active === key
                 ? key === 'alaska'
-                  ? 'bg-[#2d5016] text-white'
+                  ? 'bg-[#166534] text-white'
                   : key === 'hawaii'
-                  ? 'bg-[#0ea5e9] text-white'
-                  : 'bg-[#1e293b] text-white'
-                : 'bg-white border border-stone-200 text-stone-600 hover:border-stone-400'
+                  ? 'bg-[#0d9488] text-white'
+                  : 'bg-[#0f172a] text-white'
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-400'
             }`}
           >
             {Icon && <Icon className="w-3.5 h-3.5" />}
