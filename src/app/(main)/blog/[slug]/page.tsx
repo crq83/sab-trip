@@ -1,12 +1,13 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { MapPin, Calendar, ArrowLeft } from 'lucide-react';
+import { MapPin, Calendar, ArrowLeft, User } from 'lucide-react';
 import { createAnonClient } from '@/lib/supabase/server';
 import PostBody from '@/components/blog/PostBody';
 import AdminControls from '@/components/admin/AdminControls';
 import { getAuthState } from '@/lib/auth';
 import { Post, Media } from '@/types';
+import { resolveSenderName } from '@/lib/sender-names';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -56,6 +57,7 @@ export default async function PostPage({ params }: Props) {
     minute: '2-digit',
   });
 
+  const authorName = resolveSenderName(post.email_from);
   const coverImage = post.media?.find((m) => m.media_type === 'image');
 
   return (
@@ -97,6 +99,12 @@ export default async function PostPage({ params }: Props) {
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#f97316]" />
               <span>{post.location_name}</span>
+            </div>
+          )}
+          {authorName && (
+            <div className="flex items-center gap-1.5">
+              <User className="w-4 h-4" />
+              <span>{authorName}</span>
             </div>
           )}
         </div>
