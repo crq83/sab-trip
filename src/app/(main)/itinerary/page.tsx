@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { itinerary } from '../../../data/itinerary';
+import { itinerary } from '../../../../data/itinerary';
 import ItineraryDay from '@/components/itinerary/ItineraryDay';
 import { Mountain, Waves } from 'lucide-react';
 

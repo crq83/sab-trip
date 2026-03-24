@@ -1,9 +1,8 @@
 import { createAnonClient } from '@/lib/supabase/server';
 import GalleryGrid from '@/components/gallery/GalleryGrid';
+import { getAuthState } from '@/lib/auth';
 import { Post, Media } from '@/types';
 import { Image as ImageIcon } from 'lucide-react';
-
-export const revalidate = 60;
 
 async function getAllMedia() {
   try {
@@ -30,7 +29,7 @@ async function getAllMedia() {
 }
 
 export default async function GalleryPage() {
-  const items = await getAllMedia();
+  const [items, { isAdmin }] = await Promise.all([getAllMedia(), getAuthState()]);
   const imageCount = items.filter((i) => i.media.media_type === 'image').length;
   const videoCount = items.filter((i) => i.media.media_type === 'video').length;
 
@@ -50,7 +49,7 @@ export default async function GalleryPage() {
       </div>
 
       {items.length > 0 ? (
-        <GalleryGrid items={items} />
+        <GalleryGrid items={items} isAdmin={isAdmin} />
       ) : (
         <div className="text-center py-20">
           <ImageIcon className="w-12 h-12 text-slate-200 mx-auto mb-4" />

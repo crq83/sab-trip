@@ -11,10 +11,12 @@ export default function PostCard({ post }: Props) {
   const hasVideo = post.media?.some((m) => m.media_type === 'video');
   const mediaCount = post.media?.length ?? 0;
 
-  const date = new Date(post.post_date).toLocaleDateString('en-US', {
+  const date = new Date(post.post_date).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 
   return (
