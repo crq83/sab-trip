@@ -47,11 +47,13 @@ export default async function PostPage({ params }: Props) {
   const [post, { isAdmin }] = await Promise.all([getPost(slug), getAuthState()]);
   if (!post) notFound();
 
-  const date = new Date(post.post_date).toLocaleDateString('en-US', {
+  const date = new Date(post.post_date).toLocaleString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 
   const coverImage = post.media?.find((m) => m.media_type === 'image');

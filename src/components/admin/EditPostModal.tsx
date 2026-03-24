@@ -14,7 +14,7 @@ export default function EditPostModal({ post, onClose }: Props) {
   const [title, setTitle] = useState(post.title);
   const [body, setBody] = useState(post.body ?? '');
   const [locationName, setLocationName] = useState(post.location_name ?? '');
-  const [postDate, setPostDate] = useState(post.post_date.slice(0, 10));
+  const [postDate, setPostDate] = useState(post.post_date.slice(0, 16));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -104,9 +104,9 @@ export default function EditPostModal({ post, onClose }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Date &amp; Time</label>
             <input
-              type="date"
+              type="datetime-local"
               value={postDate}
               onChange={(e) => setPostDate(e.target.value)}
               required
