@@ -42,8 +42,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const isVideo = file.type.startsWith('video/');
     if (!isImage && !isVideo) continue;
 
-    const originalBuffer = Buffer.from(await file.arrayBuffer());
-    let buffer = originalBuffer;
+    const originalBuffer = Buffer.from(await file.arrayBuffer()) as Buffer;
+    let buffer: Buffer = originalBuffer;
     let contentType = file.type;
     let fileName = file.name || (isImage ? 'photo.jpg' : 'video.mp4');
 
