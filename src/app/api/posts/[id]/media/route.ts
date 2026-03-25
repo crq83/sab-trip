@@ -47,11 +47,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     let contentType = file.type;
     let fileName = file.name || (isImage ? 'photo.jpg' : 'video.mp4');
 
-    // Convert HEIC/HEIF to JPEG
+    // Convert and resize images: cap longest side at 2048px, quality 85.
+    // withoutEnlargement ensures small images aren't upscaled.
+    // EXIF is read from originalBuffer above, so GPS/timestamp is preserved.
     if (contentType === 'image/heic' || contentType === 'image/heif') {
-      buffer = await sharp(originalBuffer).jpeg({ quality: 90 }).toBuffer() as Buffer;
+      buffer = await sharp(originalBuffer)
+        .resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 85 })
+        .toBuffer() as Buffer;
       contentType = 'image/jpeg';
       fileName = fileName.replace(/\.(heic|heif)$/i, '.jpg');
+    } else if (isImage) {
+      buffer = await sharp(originalBuffer)
+        .resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 85 })
+        .toBuffer() as Buffer;
+      contentType = 'image/jpeg';
     }
 
     // Extract EXIF from original buffer

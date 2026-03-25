@@ -56,9 +56,21 @@ async function convertToJpegIfNeeded(
   buffer: Buffer,
   contentType: string
 ): Promise<{ buffer: Buffer; contentType: string; fileName: string }> {
+  // Convert and resize: cap longest side at 2048px, quality 85.
+  // withoutEnlargement ensures small images aren't upscaled.
   if (contentType === 'image/heic' || contentType === 'image/heif') {
-    const converted = await sharp(buffer).jpeg({ quality: 90 }).toBuffer() as Buffer;
+    const converted = await sharp(buffer)
+      .resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer() as Buffer;
     return { buffer: converted, contentType: 'image/jpeg', fileName: 'photo.jpg' };
+  }
+  if (contentType === 'image/jpeg' || contentType === 'image/jpg' || contentType === 'image/png') {
+    const converted = await sharp(buffer)
+      .resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer() as Buffer;
+    return { buffer: converted, contentType: 'image/jpeg', fileName: '' };
   }
   return { buffer, contentType, fileName: '' };
 }
