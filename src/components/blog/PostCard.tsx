@@ -1,12 +1,14 @@
 import Link from 'next/link';
-import { MapPin, Camera, Video, FileText } from 'lucide-react';
+import { MapPin, Camera, Video, FileText, User } from 'lucide-react';
 import { Post } from '@/types';
+import { resolveSenderName } from '@/lib/sender-names';
 
 interface Props {
   post: Post;
 }
 
 export default function PostCard({ post }: Props) {
+  const authorName = resolveSenderName(post.email_from);
   const coverMedia = post.media?.find((m) => m.media_type === 'image');
   const hasVideo = post.media?.some((m) => m.media_type === 'video');
   const mediaCount = post.media?.length ?? 0;
@@ -63,6 +65,13 @@ export default function PostCard({ post }: Props) {
             <div className="flex items-center gap-1 mt-1">
               <MapPin className="w-3 h-3 text-[#f97316] shrink-0" />
               <span className="text-xs text-slate-500 truncate">{post.location_name}</span>
+            </div>
+          )}
+
+          {authorName && (
+            <div className="flex items-center gap-1 mt-1">
+              <User className="w-3 h-3 text-slate-400 shrink-0" />
+              <span className="text-xs text-slate-400">{authorName}</span>
             </div>
           )}
 

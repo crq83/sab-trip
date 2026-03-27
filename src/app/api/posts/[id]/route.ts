@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase/server';
 import { deleteFromR2 } from '@/lib/r2/client';
 import { isAdminRequest } from '@/lib/auth';
+import { geocodeLocation } from '@/lib/geocoding';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -16,10 +17,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   const { id } = await params;
   const { title, body, location_name, post_date, slug } = await request.json();
 
+  let lat: number | null = null;
+  let lng: number | null = null;
+
+  if (location_name) {
+    const geocoded = await geocodeLocation(location_name);
+    if (!geocoded) {
+      return NextResponse.json(
+        { error: "Location not found. Try a more specific name (e.g. 'Juneau, Alaska')." },
+        { status: 422 }
+      );
+    }
+    lat = geocoded.lat;
+    lng = geocoded.lng;
+  }
+
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('posts')
-    .update({ title, body, location_name, post_date })
+    .update({ title, body, location_name, lat, lng, post_date })
     .eq('id', id)
     .select()
     .single();

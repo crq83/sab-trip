@@ -17,6 +17,7 @@ export default function EditPostModal({ post, onClose }: Props) {
   const [postDate, setPostDate] = useState(post.post_date.slice(0, 16));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [locationError, setLocationError] = useState(false);
 
   // Close on Escape
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function EditPostModal({ post, onClose }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setLocationError(false);
     setLoading(true);
     try {
       const res = await fetch(`/api/posts/${post.id}`, {
@@ -40,6 +42,7 @@ export default function EditPostModal({ post, onClose }: Props) {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? 'Failed to save changes.');
+        if (res.status === 422) setLocationError(true);
         return;
       }
       router.refresh();
@@ -97,9 +100,9 @@ export default function EditPostModal({ post, onClose }: Props) {
             <input
               type="text"
               value={locationName}
-              onChange={(e) => setLocationName(e.target.value)}
+              onChange={(e) => { setLocationName(e.target.value); setLocationError(false); setError(''); }}
               placeholder="e.g. Juneau, Alaska"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#f97316]/40 focus:border-[#f97316]"
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 ${locationError ? 'border-red-400 focus:ring-red-300 focus:border-red-400' : 'border-slate-200 focus:ring-[#f97316]/40 focus:border-[#f97316]'}`}
             />
           </div>
 
