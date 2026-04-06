@@ -111,7 +111,7 @@ export default async function PostPage({ params }: Props) {
       </header>
 
       {/* Content */}
-      <PostBody body={post.body} media={post.media || []} />
+      <PostBody body={post.body} media={post.media || []} isAdmin={isAdmin} />
     </div>
   );
 }
