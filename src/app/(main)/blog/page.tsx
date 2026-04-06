@@ -1,5 +1,7 @@
 import { createAnonClient } from '@/lib/supabase/server';
 import PostCard from '@/components/blog/PostCard';
+import CreatePostButton from '@/components/admin/CreatePostButton';
+import { getAuthState } from '@/lib/auth';
 import { Post, Media } from '@/types';
 import { BookOpen } from 'lucide-react';
 
@@ -20,19 +22,22 @@ async function getPosts(): Promise<Post[]> {
 }
 
 export default async function BlogPage() {
-  const posts = await getPosts();
+  const [posts, { isAdmin }] = await Promise.all([getPosts(), getAuthState()]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <div className="mb-8">
-        <h1 className="font-display text-5xl font-bold text-[#0f172a] mb-1">
-          Journal
-        </h1>
-        <p className="text-slate-500 text-sm">
-          {posts.length > 0
-            ? `${posts.length} post${posts.length !== 1 ? 's' : ''} from the field`
-            : 'Posts will appear here once the trip begins'}
-        </p>
+      <div className="flex items-end justify-between mb-8">
+        <div>
+          <h1 className="font-display text-5xl font-bold text-[#0f172a] mb-1">
+            Journal
+          </h1>
+          <p className="text-slate-500 text-sm">
+            {posts.length > 0
+              ? `${posts.length} post${posts.length !== 1 ? 's' : ''} from the field`
+              : 'Posts will appear here once the trip begins'}
+          </p>
+        </div>
+        {isAdmin && <CreatePostButton />}
       </div>
 
       {posts.length > 0 ? (
