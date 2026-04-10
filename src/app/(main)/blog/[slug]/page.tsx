@@ -22,7 +22,14 @@ async function getPost(slug: string): Promise<Post | null> {
       .eq('slug', slug)
       .eq('status', 'published')
       .single();
-    return data as (Post & { media: Media[] }) | null;
+    if (!data) return null;
+    const post = data as Post & { media: Media[] };
+    // Sort media by sort_order so that operations like rotate (which update
+    // the row and can change the DB return order) don't affect display order.
+    if (post.media) {
+      post.media.sort((a, b) => a.sort_order - b.sort_order);
+    }
+    return post;
   } catch {
     return null;
   }
