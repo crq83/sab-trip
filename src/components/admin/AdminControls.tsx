@@ -10,6 +10,51 @@ interface Props {
   post: Post;
 }
 
+// Compress an image client-side to max 2048px JPEG at 85% quality.
+// This mirrors the server-side sharp processing and keeps each file well
+// under Vercel's 4.5 MB serverless request-body limit.
+// Falls back to the original file if the browser cannot decode it (e.g. HEIC
+// on non-Safari browsers).
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const MAX = 2048;
+      let { width, height } = img;
+      if (width > MAX || height > MAX) {
+        if (width >= height) {
+          height = Math.round((height * MAX) / width);
+          width = MAX;
+        } else {
+          width = Math.round((width * MAX) / height);
+          height = MAX;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { resolve(file); return; }
+          const name = file.name.replace(/\.[^.]+$/, '.jpg');
+          resolve(new File([blob], name, { type: 'image/jpeg' }));
+        },
+        'image/jpeg',
+        0.85,
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file); // fall back to original
+    };
+    img.src = url;
+  });
+}
+
 export default function AdminControls({ post }: Props) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -24,9 +69,20 @@ export default function AdminControls({ post }: Props) {
     setUploading(true);
     setUploadError('');
 
+    // Compress images client-side before upload to stay within Vercel's
+    // 4.5 MB serverless payload limit (mobile photos are often 5–15 MB raw).
+    const processedFiles: File[] = [];
+    for (const file of Array.from(files)) {
+      if (file.type.startsWith('image/')) {
+        processedFiles.push(await compressImage(file));
+      } else {
+        processedFiles.push(file);
+      }
+    }
+
     const formData = new FormData();
     formData.append('slug', post.slug);
-    for (const file of Array.from(files)) {
+    for (const file of processedFiles) {
       formData.append('files', file);
     }
 
