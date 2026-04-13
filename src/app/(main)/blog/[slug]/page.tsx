@@ -8,6 +8,7 @@ import AdminControls from '@/components/admin/AdminControls';
 import { getAuthState } from '@/lib/auth';
 import { Post, Media } from '@/types';
 import { resolveSenderName } from '@/lib/sender-names';
+import { timezoneFromLocation } from '@/lib/timezone';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -55,6 +56,7 @@ export default async function PostPage({ params }: Props) {
   const [post, { isAdmin }] = await Promise.all([getPost(slug), getAuthState()]);
   if (!post) notFound();
 
+  const timezone = timezoneFromLocation(post.lat, post.lng);
   const date = new Date(post.post_date).toLocaleString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -62,6 +64,7 @@ export default async function PostPage({ params }: Props) {
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    timeZone: timezone,
   });
 
   const authorName = resolveSenderName(post.email_from);

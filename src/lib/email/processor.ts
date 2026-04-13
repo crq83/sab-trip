@@ -21,13 +21,11 @@ interface CloudmailinPayload {
 }
 
 // Parse "📍 Valdez, AK" or "Location: Girdwood AK" from email body.
-// Returns the matched line and the query string for geocoding.
 function parseLocationFromBody(body: string): { tag: string; query: string } | null {
   const match = body.match(/^📍\s*(.+)$/mu) || body.match(/^[Ll]ocation:\s*(.+)$/mu);
   if (!match) return null;
   return { tag: match[0], query: match[1].trim() };
 }
-
 
 function generateSlug(title: string): string {
   return slugify(title, { lower: true, strict: true, trim: true }).slice(0, 80);
@@ -56,8 +54,6 @@ async function convertToJpegIfNeeded(
   buffer: Buffer,
   contentType: string
 ): Promise<{ buffer: Buffer; contentType: string; fileName: string }> {
-  // Convert and resize: cap longest side at 2048px, quality 85.
-  // withoutEnlargement ensures small images aren't upscaled.
   if (contentType === 'image/heic' || contentType === 'image/heif') {
     const converted = await sharp(buffer)
       .resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true })
@@ -93,6 +89,13 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     payload.headers?.['message-id'] ||
     `${Date.now()}-${Math.random()}`;
 
+  // Use the email's Date header as the post timestamp — it includes the
+  // sender's UTC offset so it gives the correct local time regardless of
+  // where the Vercel server is running (UTC).
+  const emailDateHeader = payload.headers?.['Date'] || payload.headers?.['date'];
+  const emailDate = emailDateHeader ? new Date(emailDateHeader) : null;
+  const validEmailDate = emailDate && !isNaN(emailDate.getTime()) ? emailDate : null;
+
   // Sender whitelist
   const allowedSenders = (process.env.ALLOWED_SENDERS || '')
     .split(',')
@@ -113,8 +116,7 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     return { ok: true, reason: 'already processed' };
   }
 
-  // Parse location tag from body ("📍 Valdez, AK" or "Location: Girdwood AK")
-  // and strip it from the displayed body text.
+  // Parse location tag from body and strip it from displayed body text
   let cleanBody = bodyText;
   let postLat: number | null = null;
   let postLng: number | null = null;
@@ -146,7 +148,9 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     exifTakenAt: Date | null;
   };
   const uploadedMedia: UploadedMedia[] = [];
-  let postDate: Date | null = null;
+
+  // Start with email Date header; only fall back to EXIF if header is absent
+  let postDate: Date | null = validEmailDate;
 
   for (const attachment of attachments) {
     const rawBuffer = Buffer.from(attachment.content, 'base64') as Buffer;
@@ -159,7 +163,6 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     let finalContentType = attachment.content_type;
     let finalFileName = attachment.file_name;
 
-    // Convert HEIC to JPEG
     if (isImage) {
       const converted = await convertToJpegIfNeeded(rawBuffer, attachment.content_type);
       finalBuffer = converted.buffer;
@@ -167,12 +170,11 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
       if (converted.fileName) finalFileName = converted.fileName;
     }
 
-    // Extract EXIF before upload
     let exifLat: number | null = null;
     let exifLng: number | null = null;
     let exifTakenAt: Date | null = null;
     if (isImage) {
-      const exif = extractExif(rawBuffer); // use original buffer for EXIF
+      const exif = extractExif(rawBuffer);
       exifLat = exif.lat;
       exifLng = exif.lng;
       exifTakenAt = exif.takenAt;
@@ -181,6 +183,7 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
         postLat = exifLat;
         postLng = exifLng;
       }
+      // Only use EXIF date if the email Date header was missing
       if (exifTakenAt && postDate === null) {
         postDate = exifTakenAt;
       }
@@ -200,11 +203,9 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     });
   }
 
-  // Generate unique slug
   const baseSlug = generateSlug(subject) || `post-${Date.now().toString(36)}`;
   const slug = await ensureUniqueSlug(supabase, baseSlug);
 
-  // Insert post
   const { data: post, error: postError } = await supabase
     .from('posts')
     .insert({
@@ -227,7 +228,6 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     return { ok: false, reason: 'db insert failed' };
   }
 
-  // Insert media rows
   for (const [index, media] of uploadedMedia.entries()) {
     await supabase.from('media').insert({
       post_id: post.id,
@@ -244,7 +244,6 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     });
   }
 
-  // Trigger ISR revalidation
   try {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
     await fetch(`${siteUrl}/api/revalidate`, {

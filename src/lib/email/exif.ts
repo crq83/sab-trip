@@ -1,4 +1,5 @@
 import ExifReader from 'exifreader';
+import { timezoneFromLocation, parseLocalInTimezone } from '@/lib/timezone';
 
 export interface ExifResult {
   lat: number | null;
@@ -21,7 +22,6 @@ export function extractExif(buffer: Buffer): ExifResult {
     }
 
     if (tags.gps) {
-      // exifreader expanded mode computes decimal-degree convenience properties
       const gpsLat = (tags.gps as Record<string, unknown>).Latitude;
       const gpsLng = (tags.gps as Record<string, unknown>).Longitude;
 
@@ -30,7 +30,6 @@ export function extractExif(buffer: Buffer): ExifResult {
         lng = gpsLng;
         console.log(`[exif] GPS decimal: ${lat}, ${lng}`);
       } else {
-        // Fallback: parse DMS description strings e.g. "63° 4' 10.1\""
         const rawLat = (tags.gps as Record<string, { description?: string }>)['GPS Latitude'];
         const rawLng = (tags.gps as Record<string, { description?: string }>)['GPS Longitude'];
         const latRef = (tags.gps as Record<string, { description?: string }>)['GPS Latitude Ref'];
@@ -53,12 +52,13 @@ export function extractExif(buffer: Buffer): ExifResult {
     const exifTags = tags.exif as Record<string, { description?: string }> | undefined;
     if (exifTags?.DateTimeOriginal?.description) {
       const raw = exifTags.DateTimeOriginal.description;
-      // EXIF format: "2026:04:10 14:32:00"
+      // EXIF format: "2026:04:10 14:32:00" — local time, no timezone
       const match = raw.match(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
       if (match) {
-        takenAt = new Date(
-          `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`
-        );
+        const localIso = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`;
+        // Interpret local time in the timezone inferred from GPS coordinates
+        const timezone = timezoneFromLocation(lat, lng);
+        takenAt = parseLocalInTimezone(localIso, timezone);
       }
     }
 
@@ -69,7 +69,6 @@ export function extractExif(buffer: Buffer): ExifResult {
   }
 }
 
-// Parse DMS string "63° 4' 10.1\"" → decimal degrees
 function parseDms(dms: string): number | null {
   const match = dms.match(/(\d+)[°\s]+(\d+)['\s]+(\d+(?:\.\d+)?)/);
   if (!match) return null;

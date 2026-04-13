@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { MapPin, Camera, Video, FileText, User } from 'lucide-react';
 import { Post } from '@/types';
 import { resolveSenderName } from '@/lib/sender-names';
+import { timezoneFromLocation } from '@/lib/timezone';
 
 interface Props {
   post: Post;
@@ -13,12 +14,14 @@ export default function PostCard({ post }: Props) {
   const hasVideo = post.media?.some((m) => m.media_type === 'video');
   const mediaCount = post.media?.length ?? 0;
 
+  const timezone = timezoneFromLocation(post.lat, post.lng);
   const date = new Date(post.post_date).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    timeZone: timezone,
   });
 
   return (
