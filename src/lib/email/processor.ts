@@ -28,7 +28,6 @@ function parseLocationFromBody(body: string): { tag: string; query: string } | n
   return { tag: match[0], query: match[1].trim() };
 }
 
-
 function generateSlug(title: string): string {
   return slugify(title, { lower: true, strict: true, trim: true }).slice(0, 80);
 }
@@ -56,8 +55,6 @@ async function convertToJpegIfNeeded(
   buffer: Buffer,
   contentType: string
 ): Promise<{ buffer: Buffer; contentType: string; fileName: string }> {
-  // Convert and resize: cap longest side at 2048px, quality 85.
-  // withoutEnlargement ensures small images aren't upscaled.
   if (contentType === 'image/heic' || contentType === 'image/heif') {
     const converted = await sharp(buffer)
       .resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true })
@@ -73,6 +70,30 @@ async function convertToJpegIfNeeded(
     return { buffer: converted, contentType: 'image/jpeg', fileName: '' };
   }
   return { buffer, contentType, fileName: '' };
+}
+
+/**
+ * Parse the email Date header and return the sender's LOCAL wall-clock time
+ * stored as a UTC Date (i.e., the timezone offset is stripped, not applied).
+ *
+ * The site stores times as "local time pretending to be UTC" so they render
+ * correctly with the existing UTC display code. For example, an email sent at
+ * 1 AM AKDT (-0800) is stored as 01:00:00Z, not 09:00:00Z.
+ */
+function parseSenderLocalTime(dateHeader: string): Date | null {
+  const parsed = new Date(dateHeader);
+  if (isNaN(parsed.getTime())) return null;
+
+  // Extract the UTC offset from the header, e.g. "-0800", "+0530", "-08:00"
+  const offsetMatch = dateHeader.match(/([+-])(\d{2}):?(\d{2})\s*$/);
+  if (!offsetMatch) return parsed; // No offset found, use parsed value as-is
+
+  const sign = offsetMatch[1] === '+' ? 1 : -1;
+  const offsetMs = sign * (parseInt(offsetMatch[2]) * 60 + parseInt(offsetMatch[3])) * 60000;
+
+  // Add the offset back to UTC to recover the sender's local time, then
+  // store that moment as if it were UTC.
+  return new Date(parsed.getTime() + offsetMs);
 }
 
 export async function processInboundEmail(payload: CloudmailinPayload) {
@@ -159,7 +180,6 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     let finalContentType = attachment.content_type;
     let finalFileName = attachment.file_name;
 
-    // Convert HEIC to JPEG
     if (isImage) {
       const converted = await convertToJpegIfNeeded(rawBuffer, attachment.content_type);
       finalBuffer = converted.buffer;
@@ -167,16 +187,14 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
       if (converted.fileName) finalFileName = converted.fileName;
     }
 
-    // Extract EXIF before upload
     let exifLat: number | null = null;
     let exifLng: number | null = null;
     let exifTakenAt: Date | null = null;
     if (isImage) {
-      const exif = extractExif(rawBuffer); // use original buffer for EXIF
+      const exif = extractExif(rawBuffer);
       exifLat = exif.lat;
       exifLng = exif.lng;
       exifTakenAt = exif.takenAt;
-      // Use EXIF GPS only if no body location tag was found
       if (exifLat && exifLng && postLat === null) {
         postLat = exifLat;
         postLng = exifLng;
@@ -200,11 +218,18 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     });
   }
 
-  // Generate unique slug
+  // Prefer the email Date header over EXIF: it always reflects when the
+  // sender hit send, and parseSenderLocalTime strips the UTC offset so the
+  // local wall-clock time is stored (matching the site's display convention).
+  const emailDateHeader = payload.headers?.['Date'] || payload.headers?.['date'];
+  const senderLocalTime = emailDateHeader ? parseSenderLocalTime(emailDateHeader) : null;
+  if (senderLocalTime) {
+    postDate = senderLocalTime;
+  }
+
   const baseSlug = generateSlug(subject) || `post-${Date.now().toString(36)}`;
   const slug = await ensureUniqueSlug(supabase, baseSlug);
 
-  // Insert post
   const { data: post, error: postError } = await supabase
     .from('posts')
     .insert({
@@ -227,7 +252,6 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     return { ok: false, reason: 'db insert failed' };
   }
 
-  // Insert media rows
   for (const [index, media] of uploadedMedia.entries()) {
     await supabase.from('media').insert({
       post_id: post.id,
@@ -244,7 +268,6 @@ export async function processInboundEmail(payload: CloudmailinPayload) {
     });
   }
 
-  // Trigger ISR revalidation
   try {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
     await fetch(`${siteUrl}/api/revalidate`, {
