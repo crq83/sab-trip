@@ -23,8 +23,8 @@ export function middleware(request: NextRequest) {
   }
 
   // Auto-login via ?p=<password> query param.
-  // Validates the password, sets auth cookies, then redirects to the same
-  // URL without the ?p= param so it doesn't linger in the browser history.
+  // Pass through without redirecting so ?p= stays in the URL.
+  // The client-side PersistPasswordParam component keeps it across navigation.
   const passwordParam = searchParams.get('p');
   if (passwordParam) {
     const sitePassword = process.env.SITE_PASSWORD;
@@ -32,16 +32,14 @@ export function middleware(request: NextRequest) {
 
     if (passwordParam === adminPassword || passwordParam === sitePassword) {
       const isAdmin = passwordParam === adminPassword;
-      const redirectUrl = new URL(request.url);
-      redirectUrl.searchParams.delete('p');
-      const response = NextResponse.redirect(redirectUrl);
+      const response = NextResponse.next();
       response.cookies.set('view-auth', 'true', COOKIE_OPTS);
       if (isAdmin) {
         response.cookies.set('admin-auth', 'true', COOKIE_OPTS);
       }
       return response;
     }
-    // Wrong password — fall through to the normal auth check below
+    // Wrong password — fall through to normal auth check
   }
 
   const viewAuth = request.cookies.get('view-auth')?.value;
@@ -58,13 +56,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico
-     * - public files (svg, png, jpg, etc.)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };
